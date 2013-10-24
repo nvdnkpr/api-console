@@ -21,6 +21,8 @@
     if ($scope.src) {
       ramlParser.loadFile($scope.src).then(success.bind(this), error);
     }
+
+    this.keychain = {};
   };
 
   Controller.prototype.gotoView = function(view) {
