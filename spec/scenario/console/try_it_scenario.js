@@ -1,9 +1,10 @@
 describe("trying an API method", function() {
+  var BASE_URI = 'http://localhost:9001';
   fakeApiEndpoint("resource", "Hello World!");
 
   var definition = createRAML(
     "title: Example API",
-    "baseUri: http://localhost:9001",
+    "baseUri: " + BASE_URI,
     "/resource:",
     "  get:"
   );
@@ -21,7 +22,7 @@ describe("trying an API method", function() {
   describe("with no parameters", function() {
     var definition = createRAML(
       "title: Example API",
-      "baseUri: http://localhost:9001",
+      "baseUri: " + BASE_URI,
       "/resource:",
       "  get:"
     );
@@ -34,7 +35,7 @@ describe("trying an API method", function() {
       tryIt(resource);
 
       var requestUrl = resource.$('.try-it .response .request-url');
-      expect(requestUrl.getText()).toMatch(/http:\/\/localhost:9001\/resource/);
+      expect(requestUrl.getText()).toMatch(new RegExp(BASE_URI + "/resource"));
 
       var responseStatus = resource.$('.try-it .response .status');
       expect(responseStatus.getText()).toMatch(/200/);
@@ -46,4 +47,41 @@ describe("trying an API method", function() {
       expect(responseBody.getText()).toMatch(/Hello World!/);
     });
   });
+
+  describe("with a missing required uri parameter", function() {
+    var definition = createRAML(
+      "title: Example API",
+      "baseUri: " + BASE_URI,
+      "/resource/{id}:",
+      "  get:"
+    );
+
+    var fixturePath = loadRamlFixture(definition);
+
+    it("does not execute the request", function() {
+      var resource = openResource(1);
+      openTryIt(resource);
+      tryIt(resource);
+
+      var errorMessage = resource.$('.try-it .error');
+      expect(errorMessage.getText()).toMatch("Required URI Parameters must be entered");
+
+      var uriParemeterInput = resource.$('[role=path] input');
+      expect(uriParemeterInput.getAttribute('class')).toContain('error');
+    });
+  });
+
+  // describe("with an invalid uri parameter", function() {
+
+  // });
+
+  describe("with a missing required query parameter", function() {
+    it("does execute the request", function() {
+
+    });
+  });
+
+  // describe("with an invalid query parameter", function() {
+
+  // });
 });
